@@ -1,9 +1,10 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'question.dart';
 import 'lose.dart';
 import 'randomoption.dart';
 import 'main.dart';
+
 class Quiz extends StatefulWidget {
   @override
   _QuizState createState() => _QuizState();
@@ -13,6 +14,7 @@ class _QuizState extends State<Quiz> {
   Question? question;
   int score = 0;
   int bestScore = 0;
+  Set<int> answeredIndexes = {};
 
   @override
   void initState() {
@@ -23,7 +25,6 @@ class _QuizState extends State<Quiz> {
         question = fetchedQuestion;
       });
     });
-    // Load the best score when the app starts
   }
 
   void loadBestScore() async {
@@ -38,23 +39,26 @@ class _QuizState extends State<Quiz> {
     prefs.setInt('bestScore', bestScore);
   }
 
-  void handleOptionSelection(String selectedOption) {
-    if (selectedOption == question!.goodAnswer) {
-      fetchQuestion().then((fetchedQuestion) {
-        setState(() {
-          question = fetchedQuestion;
-          score += 10;
-          if (score > bestScore) {
-            bestScore = score;
-            saveBestScore(); // Save the best score when it's updated
-          }
+  void handleOptionSelection(int index) {
+    if (!answeredIndexes.contains(index)) {
+      answeredIndexes.add(index);
+      if (question!.options[index] == question!.goodAnswer) {
+        fetchQuestion().then((fetchedQuestion) {
+          setState(() {
+            question = fetchedQuestion;
+            score += 10;
+            if (score > bestScore) {
+              bestScore = score;
+              saveBestScore();
+            }
+          });
         });
-      });
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => LoseScreen(score: score)),
-      );
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LoseScreen(score: score)),
+        );
+      }
     }
   }
 
@@ -77,11 +81,14 @@ class _QuizState extends State<Quiz> {
       body: Center(
         child: Column(
           children: [
-            SizedBox(height: 20,),
+            SizedBox(height: 20),
             if (question != null)
               Text(
                 question!.label,
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
                 textAlign: TextAlign.center,
               ),
             if (question != null)
@@ -89,27 +96,30 @@ class _QuizState extends State<Quiz> {
                 width: MediaQuery.of(context).size.width * 0.8,
                 child: Center(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.1),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: MediaQuery.of(context).size.width * 0.1),
                     child: Column(
-                      children: getRandomOptions(question!.options).map((option) {
+                      children: List.generate(question!.options.length, (index) {
                         return Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.white, width: 2),
+                              border:
+                              Border.all(color: Colors.white, width: 2),
                             ),
                             child: ListTile(
                               hoverColor: Colors.cyanAccent,
                               focusColor: Colors.cyanAccent,
                               title: Text(
-                                option,
-                                style: TextStyle(color: Colors.white, fontSize: 25),
+                                question!.options[index],
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 25),
                                 textAlign: TextAlign.center,
                               ),
                               onTap: () {
-                                handleOptionSelection(option);
+                                handleOptionSelection(index);
                               },
                             ),
                           ),
@@ -123,7 +133,8 @@ class _QuizState extends State<Quiz> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.5),
+                  SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.5),
                   CircularProgressIndicator.adaptive(
                     strokeWidth: 1,
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -136,43 +147,49 @@ class _QuizState extends State<Quiz> {
               style: TextStyle(fontSize: 18, color: Colors.white),
             ),
             SizedBox(height: 20),
-              if(question != null)
+            if (question != null)
               Row(
-              mainAxisAlignment: MainAxisAlignment.center, // Center the elements horizontally
-              children: [
-                SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        score = 0;
-                      });
-                      fetchQuestion().then((fetchedQuestion) {
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
                         setState(() {
-                          question = fetchedQuestion;
+                          score = 0;
+                          answeredIndexes.clear();
                         });
-                      });
-                    },
-                    icon: Icon(Icons.replay),
-                    label: Text('Restart',style: TextStyle(fontSize: 20),),
+                        fetchQuestion().then((fetchedQuestion) {
+                          setState(() {
+                            question = fetchedQuestion;
+                          });
+                        });
+                      },
+                      icon: Icon(Icons.replay),
+                      label: Text(
+                        'Restart',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ),
                   ),
-                ),
-                SizedBox(width: 10), // Add some spacing between the buttons
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => QuizApp()),
-                      );
-                    },
-                    icon: Icon(Icons.home),
-                    label: Text('Home Page',style: TextStyle(fontSize: 20)),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => QuizApp()),
+                        );
+                      },
+                      icon: Icon(Icons.home),
+                      label: Text('Home Page',
+                          style: TextStyle(fontSize: 20)),
+                    ),
                   ),
-                ),
-                SizedBox(width: 10,)
-              ],
-            ),
+                  SizedBox(width: 10)
+                ],
+              ),
           ],
         ),
       ),

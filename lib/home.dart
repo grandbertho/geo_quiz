@@ -1,19 +1,38 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'quiz.dart';
+import 'bestscore.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  int bestScore = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    loadBestScore().then((score) {
+      setState(() {
+        bestScore = score;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage('/images/background.png'),
+          image: AssetImage('images/bg.png'),
           fit: BoxFit.cover,
         ),
       ),
       child: Scaffold(
-        backgroundColor: Colors.transparent, // Set the background color to transparent
-
+        backgroundColor: Colors.transparent,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -26,11 +45,11 @@ class Home extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.blue, // Set button background color
-                  onPrimary: Colors.white, // Set button text color
+                  primary: Colors.blue,
+                  onPrimary: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.white,width: 2),
+                    side: BorderSide(color: Colors.white, width: 2),
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
@@ -39,7 +58,6 @@ class Home extends StatelessWidget {
               ElevatedButton.icon(
                 icon: Icon(Icons.gamepad_outlined),
                 onPressed: () {
-                  // Start the quiz
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => Quiz()),
@@ -50,11 +68,11 @@ class Home extends StatelessWidget {
                   style: TextStyle(fontSize: 25),
                 ),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.blue, // Set button background color
-                  onPrimary: Colors.white, // Set button text color
+                  primary: Colors.blue,
+                  onPrimary: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.white,width: 2),
+                    side: BorderSide(color: Colors.white, width: 2),
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
@@ -62,17 +80,35 @@ class Home extends StatelessWidget {
               SizedBox(height: 20),
               ElevatedButton.icon(
                 icon: Icon(Icons.score),
-                onPressed: () {},
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Best Score'),
+                        content: Text('Current best score: ${bestScore ?? 'Loading...'}'),
+                        actions: [
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('Okay'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
                 label: Text(
                   '  Best  Score  ',
                   style: TextStyle(fontSize: 25),
                 ),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.blue, // Set button background color
-                  onPrimary: Colors.white, // Set button text color
+                  primary: Colors.blue,
+                  onPrimary: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.white,width: 2),
+                    side: BorderSide(color: Colors.white, width: 2),
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
@@ -90,13 +126,14 @@ class Home extends StatelessWidget {
                         actions: [
                           TextButton(
                             onPressed: () {
-                              Navigator.pop(context, false); // Return false if the user cancels
+                              Navigator.pop(context, false);
                             },
                             child: Text('No'),
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.pop(context, true); // Return true if the user confirms
+                              exit(0);
+                              Navigator.pop(context, true);
                             },
                             child: Text('Yes'),
                           ),
@@ -105,7 +142,6 @@ class Home extends StatelessWidget {
                     },
                   ).then((confirmed) {
                     if (confirmed == true) {
-                      // User confirmed, close the app
                       Navigator.of(context).pop();
                     }
                   });
@@ -115,11 +151,11 @@ class Home extends StatelessWidget {
                   style: TextStyle(fontSize: 25),
                 ),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.blue, // Set button background color
-                  onPrimary: Colors.white, // Set button text color
+                  primary: Colors.blue,
+                  onPrimary: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.white,width: 2),
+                    side: BorderSide(color: Colors.white, width: 2),
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),

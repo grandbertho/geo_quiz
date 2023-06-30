@@ -1,7 +1,7 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'home.dart';
-
+import 'setting.dart';
 void main() {
   runApp(QuizApp());
 }
@@ -14,7 +14,17 @@ class QuizApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: QuizScreen(),
+      home: Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('images/background.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: QuizScreen(),
+        ),
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -31,7 +41,7 @@ class _QuizScreenState extends State<QuizScreen> {
   final List<Widget> _screens = [
     Screen1(),
     Home(),
-    Screen3(),
+    Setting(),
   ];
 
   void _changeScreen(int index) {
@@ -78,14 +88,3 @@ class Screen1 extends StatelessWidget {
   }
 }
 
-class Screen3 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Screen 3',
-        style: TextStyle(fontSize: 20),
-      ),
-    );
-  }
-}
