@@ -1,9 +1,11 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'question.dart';
 import 'lose.dart';
 import 'randomoption.dart';
 import 'main.dart';
+import 'package:flutter/services.dart';
 
 class Quiz extends StatefulWidget {
   @override
@@ -11,14 +13,26 @@ class Quiz extends StatefulWidget {
 }
 
 class _QuizState extends State<Quiz> {
+  AudioCache _audioCache = AudioCache();
+  AudioPlayer ? _audioPlayer;
+  bool _isSoundEnabled = true;
   Question? question;
   int score = 0;
   int bestScore = 0;
-  Set<int> answeredIndexes = {};
 
+  @override
+  void dispose() {
+    _audioPlayer?.stop(); // Add this line
+    _audioPlayer?.release(); // Add this line
+    super.dispose();
+  }
   @override
   void initState() {
     super.initState();
+    loadSoundState();
+    if (_isSoundEnabled) {
+      _loadMusic();
+    }
     loadBestScore();
     fetchQuestion().then((fetchedQuestion) {
       setState(() {
@@ -26,23 +40,28 @@ class _QuizState extends State<Quiz> {
       });
     });
   }
-
+  void _loadMusic() async {
+    await _audioCache.load('beat.mp3');
+    _audioPlayer = await _audioCache.loop('beat.mp3');
+  }
   void loadBestScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       bestScore = prefs.getInt('bestScore') ?? 0;
     });
   }
-
   void saveBestScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('bestScore', bestScore);
   }
-
-  void handleOptionSelection(int index) {
-    if (!answeredIndexes.contains(index)) {
-      answeredIndexes.add(index);
-      if (question!.options[index] == question!.goodAnswer) {
+  void loadSoundState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isSoundEnabled = prefs.getBool('soundState') ?? true;
+    });
+  }
+  void handleOptionSelection(String option) {
+      if (option == question!.goodAnswer) {
         fetchQuestion().then((fetchedQuestion) {
           setState(() {
             question = fetchedQuestion;
@@ -54,12 +73,14 @@ class _QuizState extends State<Quiz> {
           });
         });
       } else {
+        _audioPlayer?.stop(); // Stop the audio player
+        _audioPlayer?.release();
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => LoseScreen(score: score)),
         );
       }
-    }
+
   }
 
   @override
@@ -99,27 +120,25 @@ class _QuizState extends State<Quiz> {
                     padding: EdgeInsets.symmetric(
                         horizontal: MediaQuery.of(context).size.width * 0.1),
                     child: Column(
-                      children: List.generate(question!.options.length, (index) {
+                      children : getRandomOptions(question!.options).map((option) {
                         return Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius: BorderRadius.circular(10),
-                              border:
-                              Border.all(color: Colors.white, width: 2),
+                              border: Border.all(color: Colors.white, width: 2),
                             ),
                             child: ListTile(
                               hoverColor: Colors.cyanAccent,
                               focusColor: Colors.cyanAccent,
                               title: Text(
-                                question!.options[index],
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 25),
+                                option,
+                                style: TextStyle(color: Colors.white, fontSize: 25),
                                 textAlign: TextAlign.center,
                               ),
                               onTap: () {
-                                handleOptionSelection(index);
+                                handleOptionSelection(option);
                               },
                             ),
                           ),
@@ -157,7 +176,6 @@ class _QuizState extends State<Quiz> {
                       onPressed: () {
                         setState(() {
                           score = 0;
-                          answeredIndexes.clear();
                         });
                         fetchQuestion().then((fetchedQuestion) {
                           setState(() {

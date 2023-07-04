@@ -1,8 +1,8 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'quiz.dart';
 import 'bestscore.dart';
+import 'data.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -27,7 +27,7 @@ class _HomeState extends State<Home> {
     return Container(
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage('images/bg.png'),
+          image: AssetImage('assets/background.png'),
           fit: BoxFit.cover,
         ),
       ),
@@ -37,7 +37,7 @@ class _HomeState extends State<Home> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
+              TextButton(
                 onPressed: () {},
                 child: Text(
                   'Welcome to Geographie Quiz',
@@ -58,6 +58,7 @@ class _HomeState extends State<Home> {
               ElevatedButton.icon(
                 icon: Icon(Icons.gamepad_outlined),
                 onPressed: () {
+                  updatetotalplay();
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => Quiz()),

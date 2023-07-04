@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bertho/main.dart';
 import 'package:bertho/quiz.dart';
-
+import 'data.dart';
 class LoseScreen extends StatelessWidget {
   final int score;
 
@@ -47,6 +47,7 @@ class LoseScreen extends StatelessWidget {
                 ),
               ),
               onPressed: () {
+                updatetotalplay();
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => Quiz()),
