@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:share/share.dart';
 import 'home.dart';
 import 'setting.dart';
 import 'statistique.dart';
@@ -132,7 +133,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 title: Text('About'),
                 onTap: () {
                   Navigator.pop(context);
-
+                  showAboutDialog(context: context);
                 },
               ),
               ListTile(
@@ -140,6 +141,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 title: Text('Share this App'),
                 onTap: () {
                   Navigator.pop(context);
+                  Share.share('Check out this app: https://bertho.online');
                 },
               ),
               ListTile(
@@ -163,7 +165,6 @@ class _QuizScreenState extends State<QuizScreen> {
                             TextButton(
                               onPressed: () {
                                 exit(0);
-                                Navigator.pop(context, true);
                               },
                               child: Text('Yes'),
                             ),
